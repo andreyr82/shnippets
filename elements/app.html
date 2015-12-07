@@ -1,0 +1,22 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link href="../bower_components/app-router/app-router.html" rel="import">
+
+<dom-module id="shnippets-app">
+    <template>
+        <app-router>
+            <app-route path="/" import="../pages/home-page.html"></app-route>
+            <app-route path="/login" import="../pages/login-page.html"></app-route>
+        </app-router>
+    </template>
+    <script>
+        (function () {
+            'use strict';
+            Polymer({
+                is: 'shnippets-app',
+                ready: function() {
+//                    this.globals.firebase = 'shnippetts';
+                }
+            });
+        })();
+    </script>
+</dom-module>

@@ -1,0 +1,29 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link href="../bower_components/firebase-element/firebase-auth.html" rel="import">
+<link href="../bower_components/paper-button/paper-button.html" rel="import">
+
+<dom-module id="login-page">
+    <template>
+        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="github" on-login="onLogin" on-error="onLoginError"></firebase-auth>
+        <paper-button on-click="login">Login</paper-button>
+        <paper-button on-click="logout">Logout</paper-button>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'login-page',
+            login: function() {
+                this.$.baseLogin.login();
+            },
+            logout: function() {
+                this.$.baseLogin.logout();
+            },
+            onLogin: function() {
+                this.globals.currentUser = this.user;
+            },
+            onLoginError: function(err) {
+                console.log('An error occurred: ' + err);
+            }
+        });
+    </script>
+</dom-module>

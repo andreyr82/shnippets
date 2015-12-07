@@ -1,0 +1,35 @@
+<link href="/bower_components/polymer/polymer.html" rel="import">
+<link href="/bower_components/paper-drawer-panel/paper-drawer-panel.html" rel="import">
+<link href="/bower_components/paper-header-panel/paper-header-panel.html" rel="import">
+<link href="/bower_components/paper-toolbar/paper-toolbar.html" rel="import">
+<link href="/bower_components/paper-icon-button/paper-icon-button.html" rel="import">
+<link href="/bower_components/iron-icons/iron-icons.html" rel="import">
+
+<dom-module id="layout-main" noscript>
+    <template>
+        <paper-drawer-panel  transition drawer-width="300px" responsive-width="768px" selected="main" id="paper_drawer_panel" touch-action>
+            <paper-header-panel drawer>
+                <paper-toolbar>
+                    <div class="search"></div>
+                </paper-toolbar>
+                <div class="menu"></div>
+            </paper-header-panel>
+            <paper-header-panel main>
+                <paper-toolbar>
+                    <paper-icon-button icon="menu" class="menu-toggle" paper-drawer-toggle></paper-icon-button>
+                    <div class="button"></div>
+                    <div class="title"></div>
+                </paper-toolbar>
+                <div class="content fit">
+                    <content></content>
+                </div>
+            </paper-header-panel>
+        </paper-drawer-panel>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'layout-main'
+        });
+    </script>
+</dom-module>
