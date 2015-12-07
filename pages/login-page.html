@@ -1,28 +1,138 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/firebase-element/firebase-auth.html" rel="import">
 <link href="../bower_components/paper-button/paper-button.html" rel="import">
+<link href="../bower_components/paper-card/paper-card.html" rel="import">
+<link href="../bower_components/paper-tabs/paper-tabs.html" rel="import">
+<link href="../bower_components/iron-pages/iron-pages.html" rel="import">
+<link href="../bower_components/paper-input/paper-input.html" rel="import">
 
 <dom-module id="login-page">
     <template>
-        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="github" on-login="onLogin" on-error="onLoginError"></firebase-auth>
-        <paper-button on-click="login">Login</paper-button>
-        <paper-button on-click="logout">Logout</paper-button>
+        <style>
+            .bg {
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: #eee;
+            }
+            .column {
+                flex-direction: column;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+            }
+            .dialog {
+                width: 300px;
+                height: 400px;
+            }
+            .dialog-content {
+                position: absolute;
+                top: 48px;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 10px;
+            }
+            .tabs {
+                background-color: #3f51b5;
+                color: #ffffff;
+            }
+            .tabs paper-tab {
+                --paper-tab-ink: #e91e63;
+            }
+            .tabs paper-tab.iron-selected {
+                background: #ffffff;
+                color: #000000;
+            }
+            .dialog-content > div {
+                position: relative;
+                height: 100%;
+            }
+            .button-container {
+                display: flex;
+                width: 100%;
+                position: absolute;
+                bottom: 0;
+                flex-direction: row;
+                justify-content: center;
+            }
+            .action-button {
+                background-color: #e91e63;
+                color: #ffffff;
+                --paper-button-ink-color: #3f51b5;
+            }
+        </style>
+        <div class="bg">
+            <div class="column">
+                <paper-card class="dialog">
+                    <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="password" on-login="onLogin" on-user-created="onUserCreated" on-error="onLoginError"></firebase-auth>
+                    <paper-tabs class="tabs" noink no-bar selected="{{selected}}">
+                        <paper-tab>LOGIN</paper-tab>
+                        <paper-tab>REGISTER</paper-tab>
+                    </paper-tabs>
+                    <iron-pages class="dialog-content" selected="{{selected}}">
+                        <div>
+                            <paper-input id="signinUserEmail" error-message="required value" label="Email" bind-value="{{signinUser.email}}" required></paper-input>
+                            <paper-input id="signinUserPassword" error-message="required value" label="Password" bind-value="{{signinUser.password}}" type="password" required></paper-input>
+                            <div class="button-container">
+                                <paper-button class="action-button" on-click="login">SIGN IN</paper-button>
+                            </div>
+                        </div>
+                        <div>
+                            <paper-input id="signupUserName" error-message="required value" label="Name" bind-value="{{signupUser.name}}" required></paper-input>
+                            <paper-input id="signupUserEmail" error-message="required value" label="Email" bind-value="{{signupUser.email}}" required></paper-input>
+                            <paper-input id="signupUserPassword" error-message="required value" label="Password" bind-value="{{signupUser.password}}" type="password" required></paper-input>
+                            <div class="button-container">
+                                <paper-button class="action-button" on-click="create">SIGN UP</paper-button>
+                            </div>
+                        </div>
+                    </iron-pages>
+                </paper-card>
+            </div>
+        </div>
     </template>
 
     <script>
         Polymer({
             is: 'login-page',
+            signinUser: Object,
+            signupUser: Object,
             login: function() {
-                this.$.baseLogin.login();
+                var
+                    emailValid = this.$.signinUserEmail.validate(),
+                    passValid = this.$.signinUserPassword.validate();
+                if(emailValid && passValid) {
+                    this.$.baseLogin.login();
+                }
             },
-            logout: function() {
-                this.$.baseLogin.logout();
+            create: function() {
+                var
+                    nameValid = this.$.signupUserName.validate(),
+                    emailValid = this.$.signupUserEmail.validate(),
+                    passValid = this.$.signupUserPassword.validate();
+                if(nameValid && emailValid && passValid) {
+                    this.$.baseLogin.logout();
+                }
             },
             onLogin: function() {
                 this.globals.currentUser = this.user;
             },
+            onUserCreated: function() {
+
+            },
             onLoginError: function(err) {
                 console.log('An error occurred: ' + err);
+            },
+            properties: {
+                selected: {
+                    type: Number,
+                    value: 0
+                }
             }
         });
     </script>
