@@ -5,6 +5,7 @@
 <link href="../bower_components/paper-tabs/paper-tabs.html" rel="import">
 <link href="../bower_components/iron-pages/iron-pages.html" rel="import">
 <link href="../bower_components/paper-input/paper-input.html" rel="import">
+<link href="../bower_components/iron-signals/iron-signals.html" rel="import">
 
 <dom-module id="login-page">
     <template>
@@ -70,7 +71,7 @@
         <div class="bg">
             <div class="column">
                 <paper-card class="dialog">
-                    <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="password" on-login="onLogin" on-user-created="onUserCreated" on-error="onLoginError"></firebase-auth>
+                    <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="password" on-login="onLogin" on-login="onLogout" on-user-created="onUserCreated" on-error="onLoginError"></firebase-auth>
                     <paper-tabs class="tabs" noink no-bar selected="{{selected}}">
                         <paper-tab>LOGIN</paper-tab>
                         <paper-tab>REGISTER</paper-tab>
@@ -107,7 +108,7 @@
                     emailValid = this.$.signinUserEmail.validate(),
                     passValid = this.$.signinUserPassword.validate();
                 if(emailValid && passValid) {
-                    this.$.baseLogin.login();
+                    this.$.baseLogin.login({email:this.$.signinUserEmail.value,password:this.$.signinUserPassword.value});
                 }
             },
             create: function() {
@@ -116,17 +117,22 @@
                     emailValid = this.$.signupUserEmail.validate(),
                     passValid = this.$.signupUserPassword.validate();
                 if(nameValid && emailValid && passValid) {
-                    this.$.baseLogin.logout();
+                    this.$.baseLogin.createUser(this.$.signupUserEmail.value, this.$.signupUserPassword.value);
                 }
             },
             onLogin: function() {
-                this.globals.currentUser = this.user;
+                //this.globals.currentUser = this.user;
+                this.fire('iron-signal', {name:'user-login', data:arguments})
+            },
+            onLogin: function() {
+                this.fire('iron-signal', {name:'user-logout', data:arguments})
             },
             onUserCreated: function() {
-
+                this.fire('iron-signal', {name:'user-created', data:arguments})
             },
-            onLoginError: function(err) {
+            onLoginError: function(e, err) {
                 console.log('An error occurred: ' + err);
+                this.fire('iron-signal', {name:'show-message', data:err.message})
             },
             properties: {
                 selected: {

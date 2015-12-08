@@ -1,8 +1,12 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/app-router/app-router.html" rel="import">
+<link href="../bower_components/iron-signals/iron-signals.html" rel="import">
+<link href="../elements/app-messages.html" rel="import">
 
 <dom-module id="shnippets-app">
     <template>
+        <iron-signals on-iron-signal-user-login="onLogin" on-iron-signal-user-logout="onLogout" on-iron-signal-user-created="onUserCreated" on-iron-signal-show-message="onMessage"></iron-signals>
+        <app-messages></app-messages>
         <app-router>
             <app-route path="/" import="../pages/home-page.html"></app-route>
             <app-route path="/login" import="../pages/login-page.html"></app-route>
@@ -15,6 +19,18 @@
                 is: 'shnippets-app',
                 ready: function() {
 //                    this.globals.firebase = 'shnippetts';
+                },
+                onLogin: function() {
+
+                },
+                onLogout: function() {
+
+                },
+                onUserCreated: function() {
+
+                },
+                onMessage: function() {
+
                 }
             });
         })();

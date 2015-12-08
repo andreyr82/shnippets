@@ -1,0 +1,32 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link href="../bower_components/paper-toast/paper-toast.html" rel="import">
+<link href="../bower_components/iron-signals/iron-signals.html" rel="import">
+
+<dom-module id="app-messages">
+    <template>
+      <iron-signals on-iron-signal-user-login="onLogin" on-iron-signal-user-logout="onLogout" on-iron-signal-user-created="onUserCreated" on-iron-signal-show-message="onMessage"></iron-signals>
+      <paper-toast id="toast" text="{{message}}"></paper-toast>
+    </template>
+    <script>
+            Polymer({
+                is: 'app-messages',
+                message: '',
+                ready: function() {
+//                    this.globals.firebase = 'shnippetts';
+                },
+                onLogin: function() {
+                  console.warn(arguments)
+                },
+                onLogout: function() {
+                  console.warn(arguments)
+                },
+                onUserCreated: function() {
+                  console.warn(arguments)
+                },
+                onMessage: function(e, text) {
+                  this.message = text;
+                  this.$.toast.open();
+                }
+            });
+    </script>
+</dom-module>
