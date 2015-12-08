@@ -4,29 +4,37 @@
 
 <dom-module id="app-messages">
     <template>
-      <iron-signals on-iron-signal-user-login="onLogin" on-iron-signal-user-logout="onLogout" on-iron-signal-user-created="onUserCreated" on-iron-signal-show-message="onMessage"></iron-signals>
-      <paper-toast id="toast" text="{{message}}"></paper-toast>
+        <style>
+            #toast {
+                background-color: #323232;
+                color: #f1f1f1;
+            }
+
+            #toast.error {
+                background-color: #e91e63;
+                color: #ffffff;
+            }
+        </style>
+        <iron-signals on-iron-signal-show-message="onMessage"
+                      on-iron-signal-show-error-message="onErrorMessage"></iron-signals>
+        <paper-toast id="toast" text="{{message}}" on-iron-overlay-closed="onMessageClose"></paper-toast>
     </template>
     <script>
-            Polymer({
-                is: 'app-messages',
-                message: '',
-                ready: function() {
-//                    this.globals.firebase = 'shnippetts';
-                },
-                onLogin: function() {
-                  console.warn(arguments)
-                },
-                onLogout: function() {
-                  console.warn(arguments)
-                },
-                onUserCreated: function() {
-                  console.warn(arguments)
-                },
-                onMessage: function(e, text) {
-                  this.message = text;
-                  this.$.toast.open();
-                }
-            });
+        Polymer({
+            is: 'app-messages',
+            message: '',
+            onMessage: function (e, text) {
+                this.message = text;
+                this.$.toast.open();
+            },
+            onErrorMessage: function (e, text) {
+                this.message = text;
+                this.$.toast.toggleClass('error', true);
+                this.$.toast.open();
+            },
+            onMessageClose: function () {
+                this.$.toast.toggleClass('error', false);
+            }
+        });
     </script>
 </dom-module>

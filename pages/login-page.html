@@ -68,26 +68,26 @@
                 --paper-button-ink-color: #3f51b5;
             }
         </style>
+        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="password" on-login="onLogin" on-logout="onLogout" on-user-created="onUserCreated" on-error="onLoginError"></firebase-auth>
         <div class="bg">
             <div class="column">
                 <paper-card class="dialog">
-                    <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="password" on-login="onLogin" on-login="onLogout" on-user-created="onUserCreated" on-error="onLoginError"></firebase-auth>
                     <paper-tabs class="tabs" noink no-bar selected="{{selected}}">
                         <paper-tab>LOGIN</paper-tab>
                         <paper-tab>REGISTER</paper-tab>
                     </paper-tabs>
                     <iron-pages class="dialog-content" selected="{{selected}}">
                         <div>
-                            <paper-input id="signinUserEmail" error-message="required value" label="Email" bind-value="{{signinUser.email}}" required></paper-input>
-                            <paper-input id="signinUserPassword" error-message="required value" label="Password" bind-value="{{signinUser.password}}" type="password" required></paper-input>
+                            <paper-input id="signinUserEmail" error-message="required value" label="Email" value="{{signinUser.email}}" required></paper-input>
+                            <paper-input id="signinUserPassword" error-message="required value" label="Password" value="{{signinUser.password}}" type="password" required></paper-input>
                             <div class="button-container">
                                 <paper-button class="action-button" on-click="login">SIGN IN</paper-button>
                             </div>
                         </div>
                         <div>
-                            <paper-input id="signupUserName" error-message="required value" label="Name" bind-value="{{signupUser.name}}" required></paper-input>
-                            <paper-input id="signupUserEmail" error-message="required value" label="Email" bind-value="{{signupUser.email}}" required></paper-input>
-                            <paper-input id="signupUserPassword" error-message="required value" label="Password" bind-value="{{signupUser.password}}" type="password" required></paper-input>
+                            <paper-input id="signupUserName" error-message="required value" label="Name" value="{{signupUser.name}}" required></paper-input>
+                            <paper-input id="signupUserEmail" error-message="required value" label="Email" value="{{signupUser.email}}" required></paper-input>
+                            <paper-input id="signupUserPassword" error-message="required value" label="Password" value="{{signupUser.password}}" type="password" required></paper-input>
                             <div class="button-container">
                                 <paper-button class="action-button" on-click="create">SIGN UP</paper-button>
                             </div>
@@ -101,14 +101,19 @@
     <script>
         Polymer({
             is: 'login-page',
-            signinUser: Object,
-            signupUser: Object,
+            isNewUser: false,
+            ready: function() {
+                var self = this;
+            },
             login: function() {
                 var
                     emailValid = this.$.signinUserEmail.validate(),
                     passValid = this.$.signinUserPassword.validate();
                 if(emailValid && passValid) {
-                    this.$.baseLogin.login({email:this.$.signinUserEmail.value,password:this.$.signinUserPassword.value});
+                    this.$.baseLogin.login({
+                        email:this.signinUser.email,
+                        password:this.signinUser.password
+                    });
                 }
             },
             create: function() {
@@ -117,27 +122,48 @@
                     emailValid = this.$.signupUserEmail.validate(),
                     passValid = this.$.signupUserPassword.validate();
                 if(nameValid && emailValid && passValid) {
-                    this.$.baseLogin.createUser(this.$.signupUserEmail.value, this.$.signupUserPassword.value);
+                    this.$.baseLogin.createUser(
+                        this.signupUser.email,
+                        this.signupUser.password
+                    );
                 }
             },
-            onLogin: function() {
+            onLogin: function(e, data) {
                 //this.globals.currentUser = this.user;
-                this.fire('iron-signal', {name:'user-login', data:arguments})
+                if(this.isNewUser) {
+                    this.$.baseLogin.ref.child('users').child(data.user.uid).set({
+                        name: this.signupUser.name,
+                        email: this.signupUser.email
+                    });
+                    this.isNewUser = false;
+                    this.fire('iron-signal', {name: 'user-login', data: data});
+                } else {
+                    this.fire('iron-signal', {name: 'user-login', data: data});
+                }
             },
-            onLogin: function() {
-                this.fire('iron-signal', {name:'user-logout', data:arguments})
+            onLogout: function(e, data) {
+                this.fire('iron-signal', {name:'user-logout', data:data});
             },
-            onUserCreated: function() {
-                this.fire('iron-signal', {name:'user-created', data:arguments})
+            onUserCreated: function(e, data) {
+                this.fire('iron-signal', {name:'user-created', data:data});
+                this.isNewUser = true;
+                this.$.baseLogin.login(this.signupUser);
             },
             onLoginError: function(e, err) {
-                console.log('An error occurred: ' + err);
-                this.fire('iron-signal', {name:'show-message', data:err.message})
+                this.fire('iron-signal', {name:'show-error-message', data:err.message});
             },
             properties: {
                 selected: {
                     type: Number,
                     value: 0
+                },
+                signinUser: {
+                    type: Object,
+                    value: {}
+                },
+                signupUser: {
+                    type: Object,
+                    value: {}
                 }
             }
         });

@@ -1,16 +1,18 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/app-router/app-router.html" rel="import">
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
+<link href="../bower_components/firebase-element/firebase-auth.html" rel="import">
 <link href="../elements/app-messages.html" rel="import">
 
 <dom-module id="shnippets-app">
     <template>
-        <iron-signals on-iron-signal-user-login="onLogin" on-iron-signal-user-logout="onLogout" on-iron-signal-user-created="onUserCreated" on-iron-signal-show-message="onMessage"></iron-signals>
-        <app-messages></app-messages>
-        <app-router>
+        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" on-status-known-changed="statusChanged" location="https://shnippetts.firebaseio.com" provider="password"></firebase-auth>
+        <iron-signals on-iron-signal-user-login="onLogin" on-iron-signal-user-logout="onLogout" on-iron-signal-user-created="onUserCreated"></iron-signals>
+        <app-router id="router" init="manual" on-activate-route-start="onRouteStart">
             <app-route path="/" import="../pages/home-page.html"></app-route>
             <app-route path="/login" import="../pages/login-page.html"></app-route>
         </app-router>
+        <app-messages></app-messages>
     </template>
     <script>
         (function () {
@@ -18,18 +20,30 @@
             Polymer({
                 is: 'shnippets-app',
                 ready: function() {
-//                    this.globals.firebase = 'shnippetts';
+
+                },
+                statusChanged: function() {
+                    if(this.$.baseLogin.statusKnown === true) {
+                        this.$.router.init();
+                    }
                 },
                 onLogin: function() {
-
+                    this.fire('iron-signal', {name:'show-message', data: 'You have been successfully authenticated'});
+                    this.$.router.go('/');
                 },
                 onLogout: function() {
-
+                    this.$.router.go('/login');
+                },
+                onRouteStart: function(e) {
+                    if(e.detail.path == '/login' && !!this.$.baseLogin.user) {
+                        e.preventDefault();
+                        this.$.router.go('/');
+                    } else if(e.detail.path != '/login' && !this.$.baseLogin.user) {
+                        e.preventDefault();
+                        this.$.router.go('/login');
+                    }
                 },
                 onUserCreated: function() {
-
-                },
-                onMessage: function() {
 
                 }
             });
