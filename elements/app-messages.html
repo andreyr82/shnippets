@@ -25,6 +25,7 @@
             message: '',
             onMessage: function (e, text) {
                 this.message = text;
+                this.$.toast.toggleClass('error', false);
                 this.$.toast.open();
             },
             onErrorMessage: function (e, text) {

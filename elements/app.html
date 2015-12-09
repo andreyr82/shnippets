@@ -1,4 +1,5 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
+<link href="../bower_components/paper-styles/default-theme.html" rel="import">
 <link href="../bower_components/app-router/app-router.html" rel="import">
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
 <link href="../bower_components/firebase-element/firebase-auth.html" rel="import">
@@ -6,11 +7,12 @@
 
 <dom-module id="shnippets-app">
     <template>
-        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" on-status-known-changed="statusChanged" location="https://shnippetts.firebaseio.com" provider="password"></firebase-auth>
+        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" on-status-known-changed="statusChanged" location="https://shnippetts.firebaseio.com" provider="password" on-logout="onLogout"></firebase-auth>
         <iron-signals on-iron-signal-user-login="onLogin" on-iron-signal-user-logout="onLogout" on-iron-signal-user-created="onUserCreated"></iron-signals>
         <app-router id="router" init="manual" on-activate-route-start="onRouteStart">
             <app-route path="/" import="../pages/home-page.html"></app-route>
             <app-route path="/login" import="../pages/login-page.html"></app-route>
+            <app-route path="*" import="/pages/not-found-page.html" bindRouter></app-route>
         </app-router>
         <app-messages></app-messages>
     </template>
