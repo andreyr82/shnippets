@@ -3,20 +3,32 @@
 <link href="/bower_components/paper-header-panel/paper-header-panel.html" rel="import">
 <link href="/bower_components/paper-toolbar/paper-toolbar.html" rel="import">
 <link href="/bower_components/paper-icon-button/paper-icon-button.html" rel="import">
+<link href="/bower_components/paper-menu/paper-menu.html" rel="import">
+<link href="/bower_components/paper-item/paper-item.html" rel="import">
 <link href="/bower_components/iron-icons/iron-icons.html" rel="import">
+<link href="/bower_components/iron-icon/iron-icon.html" rel="import">
+<link href="/bower_components/iron-icons/social-icons.html" rel="import">
 
-<dom-module id="layout-main" noscript>
+<dom-module id="layout-main" attributes="activepage">
     <template>
+        <style>
+            .main-content-panel {
+                background-color: #eee;
+            }
+        </style>
         <paper-drawer-panel  transition drawer-width="300px" responsive-width="768px" selected="main" id="paper_drawer_panel" touch-action>
             <paper-header-panel drawer>
                 <paper-toolbar>
                     <div class="search"></div>
                 </paper-toolbar>
-                <div class="menu"></div>
+                <paper-menu selected="{{activepage}}" attr-for-selected="pagename">
+                    <paper-item pagename="home"><a is="pushstate-anchor" href="#/"><iron-icon icon="social:person"></iron-icon>My snippets</a></paper-item>
+                    <paper-item pagename="shared"><a is="pushstate-anchor" href="#/shared"><iron-icon icon="social:group"></iron-icon>Shared snippets</a></paper-item>
+                </paper-menu>
             </paper-header-panel>
-            <paper-header-panel main>
+            <paper-header-panel main class="main-content-panel">
                 <paper-toolbar>
-                    <paper-icon-button icon="menu" class="menu-toggle" paper-drawer-toggle></paper-icon-button>
+                    <paper-icon-button icon="icons:menu" class="menu-toggle" paper-drawer-toggle></paper-icon-button>
                     <div class="button"></div>
                     <div class="title"></div>
                 </paper-toolbar>
@@ -29,7 +41,16 @@
 
     <script>
         Polymer({
-            is: 'layout-main'
+            is: 'layout-main',
+            ready: function () {
+                var self = this;
+            },
+            properties: {
+                activepage: {
+                    type: String,
+                    value: ''
+                }
+            }
         });
     </script>
 </dom-module>
