@@ -68,7 +68,6 @@
                 --paper-button-ink-color: #3f51b5;
             }
         </style>
-        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" location="https://shnippetts.firebaseio.com" provider="password" on-login="onLogin" on-logout="onLogout" on-user-created="onUserCreated" on-error="onLoginError"></firebase-auth>
         <div class="bg">
             <div class="column">
                 <paper-card class="dialog">
@@ -107,50 +106,37 @@
             },
             login: function() {
                 var
-                    emailValid = this.$.signinUserEmail.validate(),
-                    passValid = this.$.signinUserPassword.validate();
+                    self = this,
+                    emailValid = self.$.signinUserEmail.validate(),
+                    passValid = self.$.signinUserPassword.validate();
                 if(emailValid && passValid) {
-                    this.$.baseLogin.login({
-                        email:this.signinUser.email,
-                        password:this.signinUser.password
-                    });
+                  Parse.User.logIn(self.signinUser.email, self.signinUser.password, {
+                    success: function(user) {
+                      self.fire('iron-signal', {name: 'user-login', data: user});
+                    },
+            
+                    error: function(user, error) {
+                      self.fire('iron-signal', {name:'show-error-message', data:error.message});
+                    }
+                  });
                 }
             },
             create: function() {
                 var
-                    nameValid = this.$.signupUserName.validate(),
-                    emailValid = this.$.signupUserEmail.validate(),
-                    passValid = this.$.signupUserPassword.validate();
+                    self = this,
+                    nameValid = self.$.signupUserName.validate(),
+                    emailValid = self.$.signupUserEmail.validate(),
+                    passValid = self.$.signupUserPassword.validate();
                 if(nameValid && emailValid && passValid) {
-                    this.$.baseLogin.createUser(
-                        this.signupUser.email,
-                        this.signupUser.password
-                    );
+                  Parse.User.signUp(self.signupUser.email, self.signupUser.password, { ACL: new Parse.ACL(), name: self.signupUser.name }, {
+                    success: function(user) {
+                      self.fire('iron-signal', {name:'user-created', data:user});
+                    },
+                    error: function(user, error) {
+                      self.fire('iron-signal', {name:'show-error-message', data:error.message});
+                    }
+                  });
                 }
-            },
-            onLogin: function(e, data) {
-                //this.globals.currentUser = this.user;
-                if(this.isNewUser) {
-                    this.$.baseLogin.ref.child('users').child(data.user.uid).set({
-                        name: this.signupUser.name,
-                        email: this.signupUser.email
-                    });
-                    this.isNewUser = false;
-                    this.fire('iron-signal', {name: 'user-login', data: data});
-                } else {
-                    this.fire('iron-signal', {name: 'user-login', data: data});
-                }
-            },
-            onLogout: function(e, data) {
-                this.fire('iron-signal', {name:'user-logout', data:data});
-            },
-            onUserCreated: function(e, data) {
-                this.fire('iron-signal', {name:'user-created', data:data});
-                this.isNewUser = true;
-                this.$.baseLogin.login(this.signupUser);
-            },
-            onLoginError: function(e, err) {
-                this.fire('iron-signal', {name:'show-error-message', data:err.message});
             },
             properties: {
                 selected: {

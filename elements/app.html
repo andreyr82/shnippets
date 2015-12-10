@@ -7,7 +7,6 @@
 
 <dom-module id="shnippets-app">
     <template>
-        <firebase-auth id="baseLogin" user="{{user}}" statusKnown="{{statusKnown}}" on-status-known-changed="statusChanged" location="https://shnippetts.firebaseio.com" provider="password" on-logout="onLogout"></firebase-auth>
         <iron-signals on-iron-signal-user-login="onLogin" on-iron-signal-user-logout="onLogout" on-iron-signal-user-created="onUserCreated"></iron-signals>
         <app-router id="router" init="manual" on-activate-route-start="onRouteStart">
             <app-route path="/" import="../pages/home-page.html"></app-route>
@@ -22,25 +21,25 @@
             Polymer({
                 is: 'shnippets-app',
                 ready: function() {
-
-                },
-                statusChanged: function() {
-                    if(this.$.baseLogin.statusKnown === true) {
-                        this.$.router.init();
-                    }
+                  this.$.router.init();
                 },
                 onLogin: function() {
                     this.fire('iron-signal', {name:'show-message', data: 'You have been successfully authenticated'});
+                    this.$.router.go('/');
+                },
+                onUserCreated: function() {
+                    this.fire('iron-signal', {name:'show-message', data: 'You have been successfully registered'});
                     this.$.router.go('/');
                 },
                 onLogout: function() {
                     this.$.router.go('/login');
                 },
                 onRouteStart: function(e) {
-                    if(e.detail.path == '/login' && !!this.$.baseLogin.user) {
+                    var currentUser = Parse.User.current();
+                    if(e.detail.path == '/login' && currentUser) {
                         e.preventDefault();
                         this.$.router.go('/');
-                    } else if(e.detail.path != '/login' && !this.$.baseLogin.user) {
+                    } else if(e.detail.path != '/login' && !currentUser) {
                         e.preventDefault();
                         this.$.router.go('/login');
                     }
