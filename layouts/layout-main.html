@@ -15,13 +15,35 @@
             .main-content-panel {
                 background-color: #eee;
             }
+            .main-content-panel .content {
+                padding:10px;
+            }
+            .menu {
+                color: inherit;
+                padding: 0;
+            }
+            .menu paper-item.iron-selected {
+                border-right: solid 3px #e91e63;
+                background: #eceff1;
+            }
+            .menu a {
+                display: block;
+                width:100%;
+                height: 48px;
+                color: inherit;
+                line-height: 48px;
+                text-decoration: none;
+            }
+            .menu a iron-icon {
+                margin: 0 10px 5px 0;
+            }
         </style>
         <paper-drawer-panel  transition drawer-width="300px" responsive-width="768px" selected="main" id="paper_drawer_panel" touch-action>
             <paper-header-panel drawer>
                 <paper-toolbar>
                     <div class="search"></div>
                 </paper-toolbar>
-                <paper-menu selected="{{activepage}}" attr-for-selected="pagename">
+                <paper-menu class="menu" selected="{{activepage}}" attr-for-selected="pagename">
                     <paper-item pagename="home"><a is="pushstate-anchor" href="#/"><iron-icon icon="social:person"></iron-icon>My snippets</a></paper-item>
                     <paper-item pagename="shared"><a is="pushstate-anchor" href="#/shared"><iron-icon icon="social:group"></iron-icon>Shared snippets</a></paper-item>
                 </paper-menu>
@@ -32,7 +54,7 @@
                     <div class="button"></div>
                     <div class="title"></div>
                 </paper-toolbar>
-                <div class="content fit">
+                <div class="content">
                     <content></content>
                 </div>
             </paper-header-panel>

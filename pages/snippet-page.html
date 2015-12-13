@@ -1,0 +1,58 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link href="../bower_components/iron-signals/iron-signals.html" rel="import">
+<link href="../bower_components/paper-card/paper-card.html" rel="import">
+<link href="../bower_components/paper-input/paper-input.html" rel="import">
+<link href="../bower_components/paper-input/paper-textarea.html" rel="import">
+<link href="../bower_components/paper-button/paper-button.html" rel="import">
+<link href="../layouts/layout-main.html" rel="import">
+
+<dom-module id="snippet-page" attributes="snippetId">
+    <template>
+        <style>
+            .snippet-view {
+                width:100%;
+                padding: 10px 15px;
+            }
+        </style>
+        <layout-main activepage="home">
+            <paper-card class="snippet-view">
+                <paper-input id="modelTitle" error-message="required value" label="Title" value="{{model.title}}" required></paper-input>
+                <paper-textarea id="modelDescription" error-message="required value" label="Description" value="{{model.description}}" required></paper-textarea>
+            </paper-card>
+        </layout-main>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'snippet-page',
+            properties: {
+                model: {
+                    type: Object,
+                    value: {}
+                },
+                snippetId: {
+                    type: String
+                }
+            },
+            attached: function() {
+                var self = this;
+                var Snippet = Parse.Object.extend("Snippet");
+                var query = new Parse.Query(Snippet);
+                if(this.snippetId) {
+                    query.get(this.snippetId, {
+                        success: function (snippet) {
+                            self.model = snippet.toJSON();
+                        },
+                        error: function (object, error) {
+                            self.fire('iron-signal', {name:'show-error-message', data:error.message});
+                        }
+                    });
+                } else {
+                    self.model = new Snippet();
+                    self.model.set('author', Parse.User.current());
+                    self.model.setACL(new Parse.ACL(Parse.User.current()));
+                }
+            }
+        });
+    </script>
+</dom-module>
