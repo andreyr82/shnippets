@@ -1,6 +1,7 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
 <link href="../bower_components/paper-card/paper-card.html" rel="import">
+<link href="../elements/app-markdown-view.html" rel="import">
 <link href="../layouts/layout-main.html" rel="import">
 
 <dom-module id="snippets-page">
@@ -15,9 +16,9 @@
         <layout-main activepage="home">
             <template id="list" is="dom-bind">
                 <template is="dom-repeat" items="{{snippets}}" as="item">
-                    <paper-card class="snippets-item" on-click="">
+                    <paper-card class="snippets-item">
                         <h1><a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a></h1>
-                        <div>{{item.description}}</div>
+                        <div><app-markdown-view>{{item.description}}</app-markdown-view></div>
                     </paper-card>
                 </template>
             </template>

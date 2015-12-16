@@ -2,8 +2,8 @@
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
 <link href="../bower_components/paper-card/paper-card.html" rel="import">
 <link href="../bower_components/paper-input/paper-input.html" rel="import">
-<link href="../bower_components/paper-input/paper-textarea.html" rel="import">
 <link href="../bower_components/paper-button/paper-button.html" rel="import">
+<link href="../elements/app-markdown-editor.html" rel="import">
 <link href="../layouts/layout-main.html" rel="import">
 
 <dom-module id="snippet-page" attributes="snippetId">
@@ -17,7 +17,7 @@
         <layout-main activepage="home">
             <paper-card class="snippet-view">
                 <paper-input id="modelTitle" error-message="required value" label="Title" value="{{model.title}}" required></paper-input>
-                <paper-textarea id="modelDescription" error-message="required value" label="Description" value="{{model.description}}" required></paper-textarea>
+                <app-markdown-editor>{{model.description}}</app-markdown-editor>
             </paper-card>
         </layout-main>
     </template>
