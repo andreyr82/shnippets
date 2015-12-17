@@ -17,7 +17,7 @@
         <layout-main activepage="home">
             <paper-card class="snippet-view">
                 <paper-input id="modelTitle" error-message="required value" label="Title" value="{{model.title}}" required></paper-input>
-                <app-markdown-editor>{{model.description}}</app-markdown-editor>
+                <app-markdown-editor error-message="required value" label="Description" value="{{model.description}}" required></app-markdown-editor>
             </paper-card>
         </layout-main>
     </template>

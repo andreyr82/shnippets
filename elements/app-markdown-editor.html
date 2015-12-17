@@ -1,25 +1,316 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/paper-input/paper-textarea.html" rel="import">
+<link href="../bower_components/paper-toolbar/paper-toolbar.html" rel="import">
 <link href="../bower_components/paper-button/paper-button.html" rel="import">
-<link href="../bower_components/iron-icons/icon-icons.html" rel="import">
+<link href="../bower_components/iron-icons/iron-icons.html" rel="import">
 <link href="../bower_components/iron-icons/editor-icons.html" rel="import">
 <link href="../bower_components/iron-icon/iron-icon.html" rel="import">
+<link href="../bower_components/marked-element/marked-element.html" rel="import">
 
-
-<dom-module id="app-markdown-editor">
+<dom-module id="app-markdown-editor" attributes="error-message required rows value label">
     <template>
-        <div id="editor" error-message="required value" label="Description" required>
-            <content></content>
-        </div>
+        <style>
+            .btn {
+                height: 40px;
+                min-height: 40px;
+            }
+            .btn-icon {
+                width: 40px;
+                min-width: 40px;
+            }
+        </style>
+        <paper-toolbar id="btn-toolbar">
+            <div class="btn-group">
+                <paper-button class="btn btn-icon"><iron-icon icon="editor:format-bold" on-click="insertBold"></iron-icon></paper-button>
+                <paper-button class="btn btn-icon"><iron-icon icon="editor:format-italic" on-click="insertItalic"></iron-icon></paper-button>
+                <paper-button class="btn" on-click="insertHeading">Header</paper-button>
+            </div>
+            <div class="btn-group">
+                <paper-button class="btn btn-icon" on-click="insertLink"><iron-icon icon="editor:insert-link"></iron-icon></paper-button>
+                <paper-button class="btn btn-icon" on-click="insertImage"><iron-icon icon="editor:insert-photo"></iron-icon></paper-button>
+            </div>
+            <div class="btn-group">
+                <paper-button class="btn btn-icon" on-click="insertListBulleted"><iron-icon icon="editor:format-list-bulleted"></iron-icon></paper-button>
+                <paper-button class="btn btn-icon" on-click="insertListNumbered"><iron-icon icon="editor:format-list-numbered"></iron-icon></paper-button>
+                <paper-button class="btn btn-icon" on-click="insertCode"><iron-icon icon="icons:code"></iron-icon></paper-button>
+                <paper-button class="btn btn-icon" on-click="insertQuote"><iron-icon icon="editor:format-quote"></iron-icon></paper-button>
+            </div>
+            <div class="btn-group">
+                <paper-button class="btn"><iron-icon icon="icons:search"></iron-icon>Preview</paper-button>
+            </div>
+        </paper-toolbar>
+        <paper-textarea id="editor" error-message="{{error-message}}" required="{{required}}" rows="{{rows}}" label="{{label}}" value="{{value}}"></paper-textarea>
+        <marked-element markdown="{{value}}">
+            <div class="markdown-html"></div>
+        </marked-element>
     </template>
 
     <script>
         Polymer({
             is: 'app-markdown-editor',
-            attached: function() {
-                $(this.$.editor).markdown({autofocus:false,savable:false});
+            properties: {
+                'error-message': {
+                    type: String,
+                    value: 'required value'
+                },
+                required: {
+                    type: Boolean,
+                    value: false
+                },
+                rows: {
+                    type: Number,
+                    value: 4
+                },
+                value: {
+                    type: String,
+                    value: ''
+                },
+                label: {
+                    type: String,
+                    value: ''
+                }
+            },
+            nextTab: [],
+            getSelection: function() {
+                return {
+                    start: this.$.editor.$.input.selectionStart,
+                    end: this.$.editor.$.input.selectionEnd,
+                    length: this.$.editor.$.input.selectionEnd - this.$.editor.$.input.selectionStart,
+                    text: this.value.substr(this.$.editor.$.input.selectionStart, this.$.editor.$.input.selectionEnd - this.$.editor.$.input.selectionStart)
+                }
+            },
+            setSelection: function(start, end) {
+                this.$.editor.$.input.selectionStart = start;
+                this.$.editor.$.input.selectionEnd = end;
+            },
+            replaceSelection: function(text) {
+                this.value = this.value.substr(0, this.$.editor.$.input.selectionStart) + text + this.value.substr(this.$.editor.$.input.selectionEnd, this.value.length);
+                this.$.editor.$.input.selectionStart = this.value.length;
+            },
+            findSelection: function(chunk) {
+                var content = this.value, startChunkPosition;
+                var oldSelection = this.getSelection(), selection;
+                if (startChunkPosition = content.indexOf(chunk), startChunkPosition >= 0 && chunk.length > 0) {
+                    this.setSelection(startChunkPosition,startChunkPosition+chunk.length);
+                    selection = this.getSelection();
+                    this.setSelection(oldSelection.start,oldSelection.end);
+                    return selection;
+                } else {
+                    return null;
+                }
+            },
+            getNextTab: function() {
+                if (this.nextTab.length === 0) {
+                    return null;
+                } else {
+                    var nextTab, tab = this.nextTab.shift();
+                    if (typeof tab == 'function') {
+                        nextTab = tab();
+                    } else if (typeof tab == 'object' && tab.length > 0) {
+                        nextTab = tab;
+                    }
+                    return nextTab;
+                }
+            },
+            setNextTab: function(start,end) {
+                if (typeof start == 'string') {
+                    var that = this;
+                    this.nextTab.push(function(){
+                        return that.findSelection(start);
+                    });
+                } else if (typeof start == 'number' && typeof end == 'number') {
+                    var oldSelection = this.getSelection();
+
+                    this.setSelection(start,end);
+                    this.nextTab.push(this.getSelection());
+
+                    this.setSelection(oldSelection.start,oldSelection.end);
+                }
+            },
+            insertBold: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value;
+                if (selected.length === 0) {
+                    chunk = 'strong text';
+                } else {
+                    chunk = selected.text;
+                }
+                if (content.substr(selected.start-2,2) === '**'
+                        && content.substr(selected.end,2) === '**' ) {
+                    this.setSelection(selected.start-2,selected.end+2);
+                    this.replaceSelection(chunk);
+                    cursor = selected.start-2;
+                } else {
+                    this.replaceSelection('**'+chunk+'**');
+                    cursor = selected.start+2;
+                }
+                this.setSelection(cursor,cursor+chunk.length);
+            },
+            insertItalic: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value;
+                if (selected.length === 0) {
+                    chunk = 'emphasized text';
+                } else {
+                    chunk = selected.text;
+                }
+                if (content.substr(selected.start-1,1) === '_'
+                        && content.substr(selected.end,1) === '_' ) {
+                    this.setSelection(selected.start-1,selected.end+1);
+                    this.replaceSelection(chunk);
+                    cursor = selected.start-1;
+                } else {
+                    this.replaceSelection('_'+chunk+'_');
+                    cursor = selected.start+1;
+                }
+                this.setSelection(cursor,cursor+chunk.length);
+            },
+            insertHeading: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value, pointer, prevChar;
+                if (selected.length === 0) {
+                    chunk = 'heading text';
+                } else {
+                    chunk = selected.text + '\n';
+                }
+                if ((pointer = 4, content.substr(selected.start-pointer,pointer) === '### ')
+                        || (pointer = 3, content.substr(selected.start-pointer,pointer) === '###')) {
+                    this.setSelection(selected.start-pointer,selected.end);
+                    this.replaceSelection(chunk);
+                    cursor = selected.start-pointer;
+                } else if (selected.start > 0 && (prevChar = content.substr(selected.start-1,1), !!prevChar && prevChar != '\n')) {
+                    this.replaceSelection('\n\n### '+chunk);
+                    cursor = selected.start+6;
+                } else {
+                    this.replaceSelection('### '+chunk);
+                    cursor = selected.start+4;
+                }
+                this.setSelection(cursor,cursor+chunk.length);
+            },
+            insertLink: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value, link;
+                if (selected.length === 0) {
+                    chunk = 'enter link description here';
+                } else {
+                    chunk = selected.text;
+                }
+                link = prompt('Insert Hyperlink','http://');
+                if (link !== null && link !== '' && link !== 'http://' && link.substr(0,4) === 'http') {
+                    this.replaceSelection('['+chunk+']('+link+')');
+                    cursor = selected.start+1;
+                    this.setSelection(cursor,cursor+chunk.length);
+                }
+            },
+            insertImage: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value, link;
+                if (selected.length === 0) {
+                    chunk = 'enter image description here';
+                } else {
+                    chunk = selected.text;
+                }
+                link = prompt('Insert Image Hyperlink','http://');
+                if (link !== null && link !== '' && link !== 'http://' && link.substr(0,4) === 'http') {
+                    this.replaceSelection('!['+chunk+']('+link+' "'+'enter image title here'+'")');
+                    cursor = selected.start+2;
+                    this.setNextTab('enter image title here');
+                    this.setSelection(cursor,cursor+chunk.length);
+                }
+            },
+            insertListBulleted: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value;
+                if (selected.length === 0) {
+                    chunk = 'list text here';
+                    this.replaceSelection('- '+chunk);
+                    cursor = selected.start+2;
+                } else {
+                    if (selected.text.indexOf('\n') < 0) {
+                        chunk = selected.text;
+                        this.replaceSelection('- '+chunk);
+                        cursor = selected.start+2;
+                    } else {
+                        var list = [];
+                        list = selected.text.split('\n');
+                        chunk = list[0];
+                        list.forEach(function(v,k) {
+                            list[k] = '- '+v;
+                        });
+                        this.replaceSelection('\n\n'+list.join('\n'));
+                        cursor = selected.start+4;
+                    }
+                }
+                this.setSelection(cursor,cursor+chunk.length);
+            },
+            insertListNumbered: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value;
+                if (selected.length === 0) {
+                    chunk = 'list text here';
+                    this.replaceSelection('1. '+chunk);
+                    cursor = selected.start+3;
+                } else {
+                    if (selected.text.indexOf('\n') < 0) {
+                        chunk = selected.text;
+                        this.replaceSelection('1. '+chunk);
+                        cursor = selected.start+3;
+                    } else {
+                        var list = [];
+                        list = selected.text.split('\n');
+                        chunk = list[0];
+                        list.forEach(function(v,k) {
+                            list[k] = '1. '+v;
+                        });
+                        this.replaceSelection('\n\n'+list.join('\n'));
+                        cursor = selected.start+5;
+                    }
+                }
+                this.setSelection(cursor,cursor+chunk.length);
+            },
+            insertCode: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value;
+                if (selected.length === 0) {
+                    chunk = 'code text here';
+                } else {
+                    chunk = selected.text;
+                }
+                if (content.substr(selected.start-4,4) === '```\n'
+                        && content.substr(selected.end,4) === '\n```') {
+                    this.setSelection(selected.start-4, selected.end+4);
+                    this.replaceSelection(chunk);
+                    cursor = selected.start-4;
+                } else if (content.substr(selected.start-1,1) === '`'
+                        && content.substr(selected.end,1) === '`') {
+                    this.setSelection(selected.start-1,selected.end+1);
+                    this.replaceSelection(chunk);
+                    cursor = selected.start-1;
+                } else if (content.indexOf('\n') > -1) {
+                    this.replaceSelection('```\n'+chunk+'\n```');
+                    cursor = selected.start+4;
+                } else {
+                    this.replaceSelection('`'+chunk+'`');
+                    cursor = selected.start+1;
+                }
+                this.setSelection(cursor,cursor+chunk.length);
+            },
+            insertQuote: function(e) {
+                var chunk, cursor, selected = this.getSelection(), content = this.value;
+                if (selected.length === 0) {
+                    chunk = 'quote here';
+                    this.replaceSelection('> '+chunk);
+                    cursor = selected.start+2;
+                } else {
+                    if (selected.text.indexOf('\n') < 0) {
+                        chunk = selected.text;
+                        this.replaceSelection('> '+chunk);
+                        cursor = selected.start+2;
+                    } else {
+                        var list = [];
+                        list = selected.text.split('\n');
+                        chunk = list[0];
+                        list.forEach(function(v,k) {
+                            list[k] = '> '+v;
+                        });
+                        this.replaceSelection('\n\n'+list.join('\n'));
+                        cursor = selected.start+4;
+                    }
+                }
+                this.setSelection(cursor,cursor+chunk.length);
             }
         });
     </script>
 </dom-module>
-<link href="./app-markdown.html" rel="import">
