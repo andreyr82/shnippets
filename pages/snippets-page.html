@@ -17,7 +17,7 @@
             <template id="list" is="dom-bind">
                 <template is="dom-repeat" items="{{snippets}}" as="item">
                     <paper-card class="snippets-item">
-                        <h1><a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a></h1>
+                        <h2><a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a></h2>
                         <marked-element markdown="{{item.description}}">
                             <div class="markdown-html"></div>
                         </marked-element>

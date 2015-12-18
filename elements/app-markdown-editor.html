@@ -10,6 +10,10 @@
 <dom-module id="app-markdown-editor" attributes="error-message required rows value label">
     <template>
         <style>
+            #btn-toolbar {
+                background: #eceff1;
+                color: inherit;
+            }
             .btn {
                 height: 40px;
                 min-height: 40px;
@@ -34,9 +38,6 @@
                 <paper-button class="btn btn-icon" on-click="insertListNumbered"><iron-icon icon="editor:format-list-numbered"></iron-icon></paper-button>
                 <paper-button class="btn btn-icon" on-click="insertCode"><iron-icon icon="icons:code"></iron-icon></paper-button>
                 <paper-button class="btn btn-icon" on-click="insertQuote"><iron-icon icon="editor:format-quote"></iron-icon></paper-button>
-            </div>
-            <div class="btn-group">
-                <paper-button class="btn"><iron-icon icon="icons:search"></iron-icon>Preview</paper-button>
             </div>
         </paper-toolbar>
         <paper-textarea id="editor" error-message="{{error-message}}" required="{{required}}" rows="{{rows}}" label="{{label}}" value="{{value}}"></paper-textarea>

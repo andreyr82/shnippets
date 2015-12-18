@@ -41,7 +41,8 @@
         <paper-drawer-panel  transition drawer-width="300px" responsive-width="768px" selected="main" id="paper_drawer_panel" touch-action>
             <paper-header-panel drawer>
                 <paper-toolbar>
-                    <div class="search"></div>
+                    <div class="user">{{user.name}}</div>
+                    <paper-icon-button icon="icons:exit-to-app" on-click="logOut"></paper-icon-button>
                 </paper-toolbar>
                 <paper-menu class="menu" selected="{{activepage}}" attr-for-selected="pagename">
                     <paper-item pagename="home"><a is="pushstate-anchor" href="#/"><iron-icon icon="social:person"></iron-icon>My snippets</a></paper-item>
@@ -64,14 +65,25 @@
     <script>
         Polymer({
             is: 'layout-main',
-            ready: function () {
-                var self = this;
-            },
             properties: {
                 activepage: {
                     type: String,
                     value: ''
                 }
+            },
+            ready: function () {
+                this.user = Parse.User.current().toJSON();
+            },
+            logOut: function() {
+                var self = this;
+                Parse.User.logOut().then(
+                    function() {
+                        self.fire('iron-signal', {name: 'user-logout'});
+                    },
+                    function(error) {
+                        self.fire('iron-signal', {name:'show-error-message', data:error.message});
+                    }
+                )
             }
         });
     </script>
