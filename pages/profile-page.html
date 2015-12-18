@@ -1,0 +1,49 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link href="../bower_components/iron-signals/iron-signals.html" rel="import">
+<link href="../bower_components/paper-card/paper-card.html" rel="import">
+<link href="../bower_components/paper-input/paper-input.html" rel="import">
+<link href="../bower_components/paper-button/paper-button.html" rel="import">
+<link href="../layouts/layout-main.html" rel="import">
+
+<dom-module id="profile-page">
+    <template>
+        <style>
+            .profile-view {
+                width:100%;
+                padding: 10px 15px;
+            }
+        </style>
+        <layout-main activepage="profile">
+            <paper-card class="profile-view">
+                <paper-input id="modelTitle" error-message="required value" label="Title" value="{{model.name}}" required></paper-input>
+                <paper-input id="modelImage" error-message="required value" label="Image" type="file"></paper-input>
+                <iron-image src="{{model.image.url}}"></iron-image>
+                <paper-button class="action-button" on-click="saveUser"><iron-icon icon="icons:save"></iron-icon> Save</paper-button>
+            </paper-card>
+        </layout-main>
+    </template>
+    <script>
+        Polymer({
+            is:'profile-page',
+            ready: function() {
+                this.model = Parse.User.current().toJSON();
+            },
+            saveUser: function() {
+                var user = Parse.User.current();
+                var filename = new Date().valueOf();
+                user.set('name', this.model.name);
+                if(this.$.modelImage.inputElement.files.length>0) {
+                    user.set('image', new Parse.File(filename, this.$.modelImage.inputElement.files[0]));
+                }
+                user.save(null, {
+                    success: function(user) {
+                        this.model = user.toJSON();
+                    },
+                    error: function(error) {
+                        self.fire('iron-signal', {name:'show-error-message', data:error.message});
+                    }
+                });
+            }
+        })
+    </script>
+</dom-module>

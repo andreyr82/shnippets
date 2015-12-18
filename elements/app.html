@@ -11,6 +11,7 @@
         <app-router id="router" init="manual" on-activate-route-start="onRouteStart">
             <app-route path="/" import="../pages/snippets-page.html"></app-route>
             <app-route path="/snippet/:snippetId" import="../pages/snippet-page.html"></app-route>
+            <app-route path="/profile" import="../pages/profile-page.html"></app-route>
             <app-route path="/login" import="../pages/login-page.html"></app-route>
             <app-route path="*" import="/pages/not-found-page.html" bindRouter></app-route>
         </app-router>
