@@ -1,6 +1,9 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
 <link href="../bower_components/paper-card/paper-card.html" rel="import">
+<link href="/bower_components/paper-icon-button/paper-icon-button.html" rel="import">
+<link href="../bower_components/iron-icons/iron-icons.html" rel="import">
+<link href="../bower_components/iron-icons/social-icons.html" rel="import">
 <link href="../layouts/layout-main.html" rel="import">
 <link href="../bower_components/marked-element/marked-element.html" rel="import">
 
@@ -12,12 +15,24 @@
                 padding: 10px 15px;
                 margin-bottom: 20px;
             }
+            .snippets-item .header a {
+                font-size:18px;
+                font-weight: bold;
+                margin: 0 0 15px 0;
+            }
+            .snippets-item .header .action-button {
+                float: right;
+            }
         </style>
         <layout-main activepage="home">
             <template id="list" is="dom-bind">
                 <template is="dom-repeat" items="{{snippets}}" as="item">
                     <paper-card class="snippets-item">
-                        <h2><a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a></h2>
+                        <div class="header">
+                            <a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a>
+                            <paper-icon-button class="action-button view" icon="icons:open-in-new" on-click="showSnippet"></paper-icon-button>
+                            <paper-icon-button class="action-button" icon="social:share"></paper-icon-button>
+                        </div>
                         <marked-element markdown="{{item.description}}">
                             <div class="markdown-html"></div>
                         </marked-element>
@@ -48,6 +63,9 @@
                         self.fire('iron-signal', {name: 'show-error-message', data: error.message});
                     }
                 })
+            },
+            showSnippet: function() {
+                location.href = '#/snippet/';
             }
         });
     </script>

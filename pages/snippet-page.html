@@ -14,10 +14,10 @@
                 padding: 10px 15px;
             }
         </style>
-        <layout-main activepage="home">
+        <layout-main activepage="home" tool-buttons="{{toolButtons}}">
             <paper-card class="snippet-view">
-                <paper-input id="modelTitle" error-message="required value" label="Title" value="{{model.title}}" required></paper-input>
-                <app-markdown-editor error-message="required value" label="Description" value="{{model.description}}" required></app-markdown-editor>
+                <paper-input id="modelTitle" error-message="required value" label="Title" value="{{snippet.title}}" required></paper-input>
+                <app-markdown-editor error-message="required value" label="Description" text="{{snippet.description}}" required></app-markdown-editor>
             </paper-card>
         </layout-main>
     </template>
@@ -34,6 +34,11 @@
                     type: String
                 }
             },
+            ready: function() {
+                this.toolButtons = [
+                    {name:'Save',icon:'icons:save',handler:this.saveSnippet.bind(this)}
+                ];
+            },
             attached: function() {
                 var self = this;
                 var Snippet = Parse.Object.extend("Snippet");
@@ -41,7 +46,8 @@
                 if(this.snippetId) {
                     query.get(this.snippetId, {
                         success: function (snippet) {
-                            self.model = snippet.toJSON();
+                            self.model = snippet;
+                            self.snippet = self.model.toJSON();
                         },
                         error: function (object, error) {
                             self.fire('iron-signal', {name:'show-error-message', data:error.message});
@@ -49,9 +55,24 @@
                     });
                 } else {
                     self.model = new Snippet();
+                    self.snippet = self.model.toJSON();
                     self.model.set('author', Parse.User.current());
                     self.model.setACL(new Parse.ACL(Parse.User.current()));
                 }
+            },
+            saveSnippet: function() {
+                var self = this;
+                self.model.save({
+                    title:self.snippet.title,
+                    description:self.snippet.description
+                }, {
+                    success:function(snippet) {
+                        self.fire('iron-signal', {name:'show-message', data:'Snippet has been successfully saved'});
+                    },
+                    error: function(snippet, error) {
+                        self.fire('iron-signal', {name:'show-error-message', data:error.message});
+                    }
+                });
             }
         });
     </script>

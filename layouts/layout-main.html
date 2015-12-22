@@ -8,8 +8,9 @@
 <link href="/bower_components/iron-icons/iron-icons.html" rel="import">
 <link href="/bower_components/iron-icon/iron-icon.html" rel="import">
 <link href="/bower_components/iron-icons/social-icons.html" rel="import">
+<link href="../bower_components/iron-image/iron-image.html" rel="import">
 
-<dom-module id="layout-main" attributes="activepage">
+<dom-module id="layout-main" attributes="activepage tool-buttons">
     <template>
         <style>
             .main-content-panel {
@@ -37,10 +38,18 @@
             .menu a iron-icon {
                 margin: 0 10px 5px 0;
             }
+            .user-image {
+                width: 40px;
+                height: 40px;
+                margin-right: 10px;
+                background-image: url("/img/user.png");
+            }
         </style>
+        <iron-signals on-iron-signal-user-updated="onUserUpdated"></iron-signals>
         <paper-drawer-panel  transition drawer-width="300px" responsive-width="768px" selected="main" id="paper_drawer_panel" touch-action>
             <paper-header-panel drawer>
                 <paper-toolbar>
+                    <iron-image class="user-image" src="{{user.image.url}}" sizing="contain"></iron-image>
                     <div class="user">{{user.name}}</div>
                     <paper-icon-button icon="icons:exit-to-app" on-click="logOut"></paper-icon-button>
                 </paper-toolbar>
@@ -53,7 +62,7 @@
             <paper-header-panel main class="main-content-panel">
                 <paper-toolbar>
                     <paper-icon-button icon="icons:menu" class="menu-toggle" paper-drawer-toggle></paper-icon-button>
-                    <div class="button"></div>
+                    <div id="buttons"></div>
                     <div class="title"></div>
                 </paper-toolbar>
                 <div class="content">
@@ -70,10 +79,30 @@
                 activepage: {
                     type: String,
                     value: ''
+                },
+                toolButtons: {
+                    type: Array,
+                    value: []
                 }
             },
             ready: function () {
                 this.user = Parse.User.current().toJSON();
+            },
+            attached: function() {
+                var self = this;
+                if (this.toolButtons.length > 0) {
+                    this.toolButtons.forEach(function(button) {
+                        self.addToolButton(button)
+                    })
+                }
+            },
+            addToolButton: function(button) {
+                var btn = document.createElement('paper-icon-button');
+                btn.icon = button.icon;
+                btn.alt = button.name;
+                btn.title = button.name;
+                btn.onclick = button.handler;
+                Polymer.dom(this.$.buttons).appendChild(btn);
             },
             logOut: function() {
                 var self = this;
@@ -85,6 +114,9 @@
                         self.fire('iron-signal', {name:'show-error-message', data:error.message});
                     }
                 )
+            },
+            onUserUpdated: function(e, data) {
+                this.user = Parse.User.current().toJSON();
             }
         });
     </script>

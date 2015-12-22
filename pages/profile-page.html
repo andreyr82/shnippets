@@ -1,5 +1,6 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
+<link href="../bower_components/iron-image/iron-image.html" rel="import">
 <link href="../bower_components/paper-card/paper-card.html" rel="import">
 <link href="../bower_components/paper-input/paper-input.html" rel="import">
 <link href="../bower_components/paper-button/paper-button.html" rel="import">
@@ -12,13 +13,23 @@
                 width:100%;
                 padding: 10px 15px;
             }
+            .user-image {
+                width: 50px;
+                height: 50px;
+                background-image: url("/img/user.png");
+            }
+            .image-container {
+                width: 100%;
+            }
         </style>
-        <layout-main activepage="profile">
+        <iron-signals on-iron-signal-user-updated="onUserUpdated"></iron-signals>
+        <layout-main activepage="profile" tool-buttons="{{toolButtons}}">
             <paper-card class="profile-view">
                 <paper-input id="modelTitle" error-message="required value" label="Title" value="{{model.name}}" required></paper-input>
                 <paper-input id="modelImage" error-message="required value" label="Image" type="file"></paper-input>
-                <iron-image src="{{model.image.url}}"></iron-image>
-                <paper-button class="action-button" on-click="saveUser"><iron-icon icon="icons:save"></iron-icon> Save</paper-button>
+                <div class="image-container">
+                    <iron-image class="user-image" src="{{model.image.url}}" sizing="contain"></iron-image>
+                </div>
             </paper-card>
         </layout-main>
     </template>
@@ -27,8 +38,12 @@
             is:'profile-page',
             ready: function() {
                 this.model = Parse.User.current().toJSON();
+                this.toolButtons = [
+                    {name:'Save',icon:'icons:save',handler:this.saveUser.bind(this)}
+                ];
             },
             saveUser: function() {
+                var self = this;
                 var user = Parse.User.current();
                 var filename = new Date().valueOf();
                 user.set('name', this.model.name);
@@ -37,12 +52,16 @@
                 }
                 user.save(null, {
                     success: function(user) {
-                        this.model = user.toJSON();
+                        self.fire('iron-signal', {name:'user-updated', data:user});
+                        self.fire('iron-signal', {name:'show-message', data:'User data has been successfully saved'});
                     },
                     error: function(error) {
                         self.fire('iron-signal', {name:'show-error-message', data:error.message});
                     }
                 });
+            },
+            onUserUpdated: function(e, data) {
+                this.model = Parse.User.current().toJSON();
             }
         })
     </script>
