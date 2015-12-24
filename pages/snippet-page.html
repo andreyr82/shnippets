@@ -54,7 +54,7 @@
                         }
                     });
                 } else {
-                    self.model = new Snippet();
+                    self.model = new Snippet({title:'',description:''});
                     self.snippet = self.model.toJSON();
                     self.model.set('author', Parse.User.current());
                     self.model.setACL(new Parse.ACL(Parse.User.current()));

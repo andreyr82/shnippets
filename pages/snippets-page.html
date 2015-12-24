@@ -24,13 +24,13 @@
                 float: right;
             }
         </style>
-        <layout-main activepage="home">
-            <template id="list" is="dom-bind">
+        <layout-main activepage="home" tool-buttons="{{toolButtons}}">
+
                 <template is="dom-repeat" items="{{snippets}}" as="item">
                     <paper-card class="snippets-item">
                         <div class="header">
                             <a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a>
-                            <paper-icon-button class="action-button view" icon="icons:open-in-new" on-click="showSnippet"></paper-icon-button>
+                            <div class="action-button view" on-click="showSnippet"><paper-icon-button icon="icons:open-in-new"></paper-icon-button></div>
                             <paper-icon-button class="action-button" icon="social:share"></paper-icon-button>
                         </div>
                         <marked-element markdown="{{item.description}}">
@@ -38,7 +38,7 @@
                         </marked-element>
                     </paper-card>
                 </template>
-            </template>
+
         </layout-main>
     </template>
 
@@ -56,15 +56,21 @@
                         query.each(function (snippet) {
                             snippets.push(snippet.toJSON());
                         }).then(function () {
-                            self.$.list.snippets = snippets;
+                            self.snippets = snippets;
                         });
                     },
                     error: function (error) {
                         self.fire('iron-signal', {name: 'show-error-message', data: error.message});
                     }
-                })
+                });
+                self.toolButtons = [
+                    {name:'Add',icon:'icons:add',handler:this.addSnippet.bind(this)}
+                ];
             },
-            showSnippet: function() {
+            showSnippet: function(e) {
+                location.href = '#/snippet/'+ e.model.item.objectId;
+            },
+            addSnippet: function() {
                 location.href = '#/snippet/';
             }
         });
