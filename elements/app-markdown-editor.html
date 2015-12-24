@@ -6,6 +6,7 @@
 <link href="../bower_components/iron-icons/editor-icons.html" rel="import">
 <link href="../bower_components/iron-icon/iron-icon.html" rel="import">
 <link href="../bower_components/marked-element/marked-element.html" rel="import">
+<link href="./highlight-import.html" rel="import">
 
 <dom-module id="app-markdown-editor" attributes="error-message required rows text label">
     <template>
@@ -41,7 +42,7 @@
             </div>
         </paper-toolbar>
         <paper-textarea id="editor" error-message="{{error-message}}" required="{{required}}" rows="{{rows}}" label="{{label}}" value="{{text}}"></paper-textarea>
-        <marked-element markdown="{{text}}">
+        <marked-element markdown="{{text}}" on-syntax-highlight="highlightMarkdown">
             <div class="markdown-html"></div>
         </marked-element>
     </template>
@@ -73,6 +74,9 @@
                 }
             },
             nextTab: [],
+            highlightMarkdown: function(e, params) {
+                params.code = hljs.highlightAuto(params.code).value;
+            },
             getSelection: function() {
                 return {
                     start: this.$.editor.$.input.selectionStart,
