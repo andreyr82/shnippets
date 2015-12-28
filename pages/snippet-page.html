@@ -16,8 +16,8 @@
         </style>
         <layout-main activepage="home" tool-buttons="{{toolButtons}}">
             <paper-card class="snippet-view">
-                <paper-input id="modelTitle" error-message="required value" label="Title" value="{{snippet.title}}" required></paper-input>
-                <app-markdown-editor error-message="required value" label="Description" text="{{snippet.description}}" required></app-markdown-editor>
+                <paper-input id="modelTitle" error-message="required value" label="Title" value="{{snippet.title}}" disabled="{{disabled}}" required></paper-input>
+                <app-markdown-editor error-message="required value" label="Description" text="{{snippet.description}}" disabled="{{disabled}}" required></app-markdown-editor>
             </paper-card>
         </layout-main>
     </template>
@@ -32,6 +32,10 @@
                 },
                 snippetId: {
                     type: String
+                },
+                disabled: {
+                    type: Boolean,
+                    value: true
                 }
             },
             ready: function() {
@@ -47,6 +51,7 @@
                     query.get(this.snippetId, {
                         success: function (snippet) {
                             self.model = snippet;
+                            self.disabled = !(snippet.getACL().getWriteAccess(Parse.User.current()));
                             self.snippet = self.model.toJSON();
                         },
                         error: function (object, error) {

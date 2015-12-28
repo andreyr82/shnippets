@@ -1,0 +1,68 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link href="../bower_components/paper-dialog/paper-dialog.html" rel="import">
+<link href="../bower_components/paper-button/paper-button.html" rel="import">
+<link href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html" rel="import">
+
+<dom-module id="share-dialog" attributes="open author">
+    <template>
+        <style>
+            .user-image {
+                width: 40px;
+                height: 40px;
+                margin-right: 10px;
+                background-image: url("/img/user.png");
+            }
+        </style>
+        <paper-dialog id="dialog" on-iron-overlay-opened="onOpen" on-iron-overlay-closed="onClose" modal>
+            <h2>Select users</h2>
+            <paper-dialog-scrollable>
+                <div id="list">
+                    <template is="dom-repeat" items="{{users}}" as="item">
+                            <div class="user">
+                                <!--<a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a>-->
+                                <iron-image class="user-image" src="{{item.image.url}}" sizing="contain"></iron-image>
+                                <div class="user-name">{{item.name}}</div>
+                            </div>
+                    </template>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm>Accept</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+        Polymer({
+            is:'share-dialog',
+            onOpen: function(e) {
+                var self = this;
+                var users = [];
+                var query = new Parse.Query(Parse.User);
+                query.notContainedIn("objectId", [Parse.User.current().id, this.author.objectId]);
+                query.find({
+                    success: function (results) {
+                        self.list = results;
+                        query.each(function (user) {
+                            users.push(user.toJSON());
+                        }).then(function () {
+                            self.users = users;
+                        });
+                    },
+                    error: function (error) {
+                        self.fire('iron-signal', {name: 'show-error-message', data: error.message});
+                    }
+                });
+            },
+            onClose: function() {
+                if(this.$.dialog.closingReason.confirmed == true) {
+
+                }
+            },
+            open: function() {
+                this.$.dialog.open();
+            }
+        })
+    </script>
+
+</dom-module>

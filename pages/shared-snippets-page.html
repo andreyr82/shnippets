@@ -1,15 +1,15 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
 <link href="../bower_components/paper-card/paper-card.html" rel="import">
-<link href="../bower_components/paper-icon-button/paper-icon-button.html" rel="import">
+<link href="/bower_components/paper-icon-button/paper-icon-button.html" rel="import">
 <link href="../bower_components/iron-icons/iron-icons.html" rel="import">
 <link href="../bower_components/iron-icons/social-icons.html" rel="import">
-<link href="../bower_components/marked-element/marked-element.html" rel="import">
 <link href="../layouts/layout-main.html" rel="import">
 <link href="../elements/highlight-import.html" rel="import">
 <link href="../elements/share-dialog.html" rel="import">
+<link href="../bower_components/marked-element/marked-element.html" rel="import">
 
-<dom-module id="snippets-page">
+<dom-module id="shared-snippets-page">
     <template>
         <style>
             .snippets-item {
@@ -27,31 +27,27 @@
             }
         </style>
         <share-dialog id="dialog"></share-dialog>
-        <layout-main activepage="home" tool-buttons="{{toolButtons}}">
-                <template is="dom-repeat" items="{{snippets}}" as="item">
-                    <paper-card class="snippets-item">
-                        <div class="header">
-                            <a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a>
-                            <div class="action-button" on-click="showSnippet"><paper-icon-button icon="icons:open-in-new"></paper-icon-button></div>
-                            <div class="action-button" on-click="shareSnippet"><paper-icon-button icon="social:share"></paper-icon-button></div>
-                            <div class="action-button" on-click="deleteSnippet"><paper-icon-button icon="icons:delete"></paper-icon-button></div>
-                        </div>
-                        <marked-element markdown="{{item.description}}" on-syntax-highlight="highlightMarkdown">
-                            <div class="markdown-html"></div>
-                        </marked-element>
-                    </paper-card>
-                </template>
+        <layout-main activepage="shared">
+            <template is="dom-repeat" items="{{snippets}}" as="item">
+                <paper-card class="snippets-item">
+                    <div class="header">
+                        <a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a>
+                        <div class="action-button" on-click="showSnippet"><paper-icon-button icon="icons:open-in-new"></paper-icon-button></div>
+                        <div class="action-button" on-click="shareSnippet"><paper-icon-button icon="social:share"></paper-icon-button></div>
+                    </div>
+                    <marked-element markdown="{{item.description}}" on-syntax-highlight="highlightMarkdown">
+                        <div class="markdown-html"></div>
+                    </marked-element>
+                </paper-card>
+            </template>
         </layout-main>
     </template>
 
     <script>
         Polymer({
-            is: 'snippets-page',
+            is: 'shared-snippets-page',
             ready: function () {
                 var self = this;
-                self.toolButtons = [
-                    {name:'Add',icon:'icons:add',handler:this.addSnippet.bind(this)}
-                ];
                 self.updateList();
             },
             updateList:function() {
@@ -59,7 +55,7 @@
                 var snippets = [];
                 var Snippet = Parse.Object.extend('Snippet');
                 var query = new Parse.Query(Snippet);
-                query.equalTo("author", Parse.User.current());
+                query.notEqualTo("author", Parse.User.current());
                 query.find({
                     success: function (results) {
                         self.list = results;
@@ -80,29 +76,10 @@
             showSnippet: function(e) {
                 location.href = '#/snippet/'+ e.model.item.objectId;
             },
-            addSnippet: function() {
-                location.href = '#/snippet/';
-            },
             shareSnippet: function(e) {
                 this.$.dialog.author = e.model.item.author;
                 this.$.dialog.open();
             },
-            deleteSnippet: function(e) {
-                var self = this;
-                self.list.forEach(function(item) {
-                    if(item.id == e.model.item.objectId) {
-                        item.destroy({
-                            success: function (snippet) {
-                                self.fire('iron-signal', {name: 'show-message', data: 'Snippet has been successfully deleted'});
-                                self.updateList();
-                            },
-                            error: function (error) {
-                                self.fire('iron-signal', {name: 'show-error-message', data: error.message});
-                            }
-                        })
-                    }
-                })
-            }
         });
     </script>
 </dom-module>

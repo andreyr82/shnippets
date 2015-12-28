@@ -125,9 +125,11 @@
                     self = this,
                     nameValid = self.$.signupUserName.validate(),
                     emailValid = self.$.signupUserEmail.validate(),
-                    passValid = self.$.signupUserPassword.validate();
+                    passValid = self.$.signupUserPassword.validate(),
+                    acl = new Parse.ACL();
+                acl.setPublicReadAccess(true);
                 if(nameValid && emailValid && passValid) {
-                  Parse.User.signUp(self.signupUser.email, self.signupUser.password, { ACL: new Parse.ACL(), name: self.signupUser.name }, {
+                  Parse.User.signUp(self.signupUser.email, self.signupUser.password, { ACL: acl, name: self.signupUser.name }, {
                     success: function(user) {
                       self.fire('iron-signal', {name:'user-created', data:user});
                     },

@@ -31,6 +31,8 @@
     "paper-menu": "PolymerElements/paper-menu#~1.2.0",
     "paper-item": "PolymerElements/paper-item#~1.1.2",
     "marked-element": "PolymerElements/marked-element#~1.1.1",
-    "iron-image": "PolymerElements/iron-image#~1.0.4"
+    "iron-image": "PolymerElements/iron-image#~1.0.4",
+    "paper-dialog": "PolymerElements/paper-dialog#~1.0.3",
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#~1.1.0"
   }
 }
