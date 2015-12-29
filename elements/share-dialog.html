@@ -1,52 +1,138 @@
 <link href="../bower_components/polymer/polymer.html" rel="import">
 <link href="../bower_components/paper-dialog/paper-dialog.html" rel="import">
 <link href="../bower_components/paper-button/paper-button.html" rel="import">
+<link href="../bower_components/paper-checkbox/paper-checkbox.html" rel="import">
+<link href="../bower_components/iron-icon/iron-icon.html" rel="import">
+<link href="../bower_components/iron-icons/social-icons.html" rel="import">
+<link href="../bower_components/paper-input/paper-input.html" rel="import">
+<link href="../bower_components/paper-material/paper-material.html" rel="import">
+<link href="../bower_components/paper-item/paper-item.html" rel="import">
+<link href="../bower_components/iron-collapse/iron-collapse.html" rel="import">
 <link href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html" rel="import">
 
-<dom-module id="share-dialog" attributes="open author">
+<dom-module id="share-dialog" attributes="open item">
     <template>
         <style>
+            #dialog {
+                width: 444px;
+            }
+            #list:first-child {
+                margin-top: 8px;
+            }
+            #list:last-child > .user-name {
+                border-bottom: none;
+            }
+            #collapse {
+                width: 400px;
+                top: -80px;
+                position: absolute;
+                clear: both;
+                background-color: #fff;
+            }
+            #resultsContainer {
+                position: relative;
+            }
+            .user-row {
+                clear: both;
+                height: 40px;
+                margin-bottom: 10px;
+            }
+            .user-select {
+                float: left;
+                margin: 11px 10px 11px 10px;
+            }
+            .user-name {
+                float: left;
+                height: 40px;
+                line-height: 40px;
+                width: 300px;
+                border-bottom: solid 1px whitesmoke;
+            }
+            .user-name.new {
+                line-height: inherit;
+                border: none;
+            }
             .user-image {
+                -webkit-background-size: 40px 40px;
+                background-size: 40px 40px;
+                -webkit-border-radius: 50%;
+                border-radius: 50%;
+                float: left;
                 width: 40px;
                 height: 40px;
                 margin-right: 10px;
                 background-image: url("/img/user.png");
             }
+            .user-image.new {
+                background: none;
+                color: grey;
+                border: solid 1px grey;
+            }
+            .user-image.new iron-icon {
+                margin: 8px 6px;
+            }
         </style>
         <paper-dialog id="dialog" on-iron-overlay-opened="onOpen" on-iron-overlay-closed="onClose" modal>
-            <h2>Select users</h2>
+            <h2>Users with access</h2>
             <paper-dialog-scrollable>
                 <div id="list">
                     <template is="dom-repeat" items="{{users}}" as="item">
-                            <div class="user">
-                                <!--<a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a>-->
-                                <iron-image class="user-image" src="{{item.image.url}}" sizing="contain"></iron-image>
-                                <div class="user-name">{{item.name}}</div>
-                            </div>
+                        <div class="user-row">
+                            <iron-image class="user-image" src="{{item.image.url}}" sizing="contain"></iron-image>
+                            <div class="user-name">{{item.name}}</div>
+                        </div>
                     </template>
                 </div>
             </paper-dialog-scrollable>
+            <div class="user-row">
+                <div class="user-image new"><iron-icon icon="social:person-add"></iron-icon></div>
+                <div class="user-name new"><paper-input placeholder="enter name or email" value="{{searchValue}}" on-keypress="keyPressed" no-label-float></paper-input></div>
+            </div>
             <div class="buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
                 <paper-button dialog-confirm>Accept</paper-button>
+            </div>
+            <div id="resultsContainer">
+                <iron-collapse id="collapse">
+                    <paper-material>
+                        <div>
+                            <template id="resultList" is="dom-repeat" items="{{choices}}" filter="_listFilter">
+                                <paper-item>
+                                    <paper-button on-tap="_selectItem">{{item.name}}</paper-button>
+                                </paper-item>
+                            </template>
+                        </div>
+                    </paper-material>
+                </iron-collapse>
             </div>
         </paper-dialog>
     </template>
     <script>
         Polymer({
             is:'share-dialog',
+            properties: {
+                searchValue: {
+                    type: String,
+                    value: ''
+                }
+            },
             onOpen: function(e) {
                 var self = this;
                 var users = [];
+                var filter = [];
                 var query = new Parse.Query(Parse.User);
-                query.notContainedIn("objectId", [Parse.User.current().id, this.author.objectId]);
+                filter.push(this.item.author.objectId);
+                query.notContainedIn("objectId", [Parse.User.current().id, this.item.author.objectId]);
+                query.containedIn("objectId", Object.keys(this.item.ACL));
                 query.find({
                     success: function (results) {
                         self.list = results;
                         query.each(function (user) {
                             users.push(user.toJSON());
+                            filter.push(user.id);
                         }).then(function () {
                             self.users = users;
+                            self.filter = filter;
                         });
                     },
                     error: function (error) {
@@ -56,11 +142,55 @@
             },
             onClose: function() {
                 if(this.$.dialog.closingReason.confirmed == true) {
-
+                    this.fire('selected', {user:this.value, item:this.item})
                 }
             },
             open: function() {
                 this.$.dialog.open();
+            },
+            keyPressed: function(e) {
+//                var self = this;
+//            },
+//            _valueChanged: function(e) {
+                var self = this;
+                var users = [];
+                var collapse = this.$.collapse;
+                var query = new Parse.Query(Parse.User);
+                if (self.searchValue != '' && !collapse.opened) {
+                    collapse.toggle();
+                } else
+                if (self.searchValue == '' && collapse.opened) {
+                    collapse.toggle();
+                }
+                if(self.searchValue.length >= 3) {
+                    query.notContainedIn("objectId", self.filter);
+                    query.find({
+                        success: function (results) {
+                            query.each(function (user) {
+                                users.push(user.toJSON());
+                            }).then(function () {
+                                self.choices = users;
+                                if (!collapse.opened) {
+                                    self.$.resultList.render();
+                                    collapse.toggle();
+                                }
+                            });
+                        },
+                        error: function (error) {
+                            self.fire('iron-signal', {name: 'show-error-message', data: error.message});
+                        }
+                    });
+                }
+            },
+            _listFilter: function(item) {
+                return item.name.toLowerCase().includes(
+                        this.searchValue.toLowerCase()
+                )
+            },
+            _selectItem: function(event) {
+                this.set('searchValue', event.model.item.name);
+                this.set('value', event.model.item.objectId);
+                collapse.toggle()
             }
         })
     </script>

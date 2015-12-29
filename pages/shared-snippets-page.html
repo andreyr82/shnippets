@@ -77,9 +77,9 @@
                 location.href = '#/snippet/'+ e.model.item.objectId;
             },
             shareSnippet: function(e) {
-                this.$.dialog.author = e.model.item.author;
+                this.$.dialog.item = e.model.item;
                 this.$.dialog.open();
-            },
+            }
         });
     </script>
 </dom-module>

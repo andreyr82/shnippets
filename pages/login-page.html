@@ -4,6 +4,7 @@
 <link href="../bower_components/paper-tabs/paper-tabs.html" rel="import">
 <link href="../bower_components/iron-pages/iron-pages.html" rel="import">
 <link href="../bower_components/paper-input/paper-input.html" rel="import">
+<link href="../bower_components/gold-email-input/gold-email-input.html" rel="import">
 <link href="../bower_components/iron-signals/iron-signals.html" rel="import">
 
 <dom-module id="login-page">
@@ -84,7 +85,7 @@
                         </div>
                         <div>
                             <paper-input id="signupUserName" error-message="required value" label="Name" value="{{signupUser.name}}" required></paper-input>
-                            <paper-input id="signupUserEmail" error-message="required value" label="Email" value="{{signupUser.email}}" required></paper-input>
+                            <gold-email-input id="signupUserEmail" error-message="required value" label="Email" value="{{signupUser.email}}" required></gold-email-input>
                             <paper-input id="signupUserPassword" error-message="required value" label="Password" value="{{signupUser.password}}" type="password" required></paper-input>
                             <div class="button-container">
                                 <paper-button class="action-button" on-click="create">SIGN UP</paper-button>
@@ -129,7 +130,7 @@
                     acl = new Parse.ACL();
                 acl.setPublicReadAccess(true);
                 if(nameValid && emailValid && passValid) {
-                  Parse.User.signUp(self.signupUser.email, self.signupUser.password, { ACL: acl, name: self.signupUser.name }, {
+                  Parse.User.signUp(self.signupUser.email, self.signupUser.password, { ACL: acl, name: self.signupUser.name, email: self.signupUser.email}, {
                     success: function(user) {
                       self.fire('iron-signal', {name:'user-created', data:user});
                     },

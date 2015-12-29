@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "_default": {
+      "link": "shnippets"
+    },
+    "shnippets": {
+      "applicationId": "UxgFI1n3kBpR9meCNNUQU1IcOHdQq8ywngtEjYqu"
+    }
+  }
+}
