@@ -85,19 +85,19 @@
             },
             getSelection: function() {
                 return {
-                    start: this.$.editor.$.input.selectionStart,
-                    end: this.$.editor.$.input.selectionEnd,
-                    length: this.$.editor.$.input.selectionEnd - this.$.editor.$.input.selectionStart,
-                    text: this.text.substr(this.$.editor.$.input.selectionStart, this.$.editor.$.input.selectionEnd - this.$.editor.$.input.selectionStart)
+                    start: this.$$('#editor').$.input.selectionStart,
+                    end: this.$$('#editor').$.input.selectionEnd,
+                    length: this.$$('#editor').$.input.selectionEnd - this.$$('#editor').$.input.selectionStart,
+                    text: this.text.substr(this.$$('#editor').$.input.selectionStart, this.$$('#editor').$.input.selectionEnd - this.$$('#editor').$.input.selectionStart)
                 }
             },
             setSelection: function(start, end) {
-                this.$.editor.$.input.selectionStart = start;
-                this.$.editor.$.input.selectionEnd = end;
+                this.$$('#editor').$.input.selectionStart = start;
+                this.$$('#editor').$.input.selectionEnd = end;
             },
             replaceSelection: function(text) {
-                this.text = this.text.substr(0, this.$.editor.$.input.selectionStart) + text + this.text.substr(this.$.editor.$.input.selectionEnd, this.text.length);
-                this.$.editor.$.input.selectionStart = this.text.length;
+                this.text = this.text.substr(0, this.$$('#editor').$.input.selectionStart) + text + this.text.substr(this.$$('#editor').$.input.selectionEnd, this.text.length);
+                this.$$('#editor').$.input.selectionStart = this.text.length;
             },
             findSelection: function(chunk) {
                 var content = this.text, startChunkPosition;
