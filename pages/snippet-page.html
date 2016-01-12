@@ -60,6 +60,7 @@
                     });
                 } else {
                     self.model = new Snippet({title:'',description:''});
+                    self.disabled = false;
                     self.snippet = self.model.toJSON();
                     self.model.set('author', Parse.User.current());
                     self.model.setACL(new Parse.ACL(Parse.User.current()));
