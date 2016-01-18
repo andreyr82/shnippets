@@ -28,6 +28,7 @@
                 position: absolute;
                 clear: both;
                 background-color: #fff;
+                border: 1px solid whitesmoke;
             }
             #resultsContainer {
                 position: relative;
@@ -71,6 +72,12 @@
             .user-image.new iron-icon {
                 margin: 8px 6px;
             }
+            #userlist paper-item {
+                border-bottom: solid 1px whitesmoke;
+            }
+            #userlist paper-item:last-of-type {
+                border-bottom: none;
+            }
         </style>
         <paper-dialog id="dialog" on-iron-overlay-opened="onOpen" on-iron-overlay-closed="onClose" modal>
             <h2>Users with access</h2>
@@ -94,7 +101,7 @@
             </div>
             <div id="resultsContainer">
                 <iron-collapse id="collapse">
-                    <paper-material>
+                    <paper-material id="userlist">
                         <div>
                             <template id="resultList" is="dom-repeat" items="{{choices}}" filter="_listFilter">
                                 <paper-item>
@@ -144,6 +151,12 @@
                 if(this.$.dialog.closingReason.confirmed == true) {
                     this.fire('selected', {user:this.value, item:this.item})
                 }
+                this.users = undefined;
+                this.filter = undefined;
+                this.list = undefined;
+                this.value = undefined;
+                this.searchValue = undefined;
+                this.choices = undefined;
             },
             open: function() {
                 this.$.dialog.open();
@@ -152,9 +165,11 @@
 //                var self = this;
 //            },
 //            _valueChanged: function(e) {
+                
                 var self = this;
                 var users = [];
                 var collapse = this.$.collapse;
+                var userList = this.$.userlist;
                 var query = new Parse.Query(Parse.User);
                 if (self.searchValue != '' && !collapse.opened) {
                     collapse.toggle();
@@ -174,6 +189,7 @@
                                     self.$.resultList.render();
                                     collapse.toggle();
                                 }
+                                collapse.updateSize(userList.style.height);
                             });
                         },
                         error: function (error) {

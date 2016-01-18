@@ -26,14 +26,14 @@
                 float: right;
             }
         </style>
-        <share-dialog id="dialog"></share-dialog>
+        <share-dialog id="dialog" on-selected="shareSnippet"></share-dialog>
         <layout-main activepage="shared">
             <template is="dom-repeat" items="{{snippets}}" as="item">
                 <paper-card class="snippets-item">
                     <div class="header">
                         <a is="pushstate-anchor" href="#/snippet/{{item.objectId}}">{{item.title}}</a>
                         <div class="action-button" on-click="showSnippet"><paper-icon-button icon="icons:open-in-new"></paper-icon-button></div>
-                        <div class="action-button" on-click="shareSnippet"><paper-icon-button icon="social:share"></paper-icon-button></div>
+                        <div class="action-button" on-click="openShareDialog"><paper-icon-button icon="social:share"></paper-icon-button></div>
                     </div>
                     <marked-element markdown="{{item.description}}" on-syntax-highlight="highlightMarkdown">
                         <div class="markdown-html"></div>
@@ -76,9 +76,28 @@
             showSnippet: function(e) {
                 location.href = '#/snippet/'+ e.model.item.objectId;
             },
-            shareSnippet: function(e) {
+            openShareDialog: function(e) {
                 this.$.dialog.item = e.model.item;
                 this.$.dialog.open();
+            },
+            shareSnippet: function(e) {
+                var self = this;
+                if(e.detail.user) {
+                    self.list.forEach(function(item) {
+                        if (item.id == e.detail.item.objectId) {
+                            item.getACL().setReadAccess(e.detail.user, true);
+                            item.save(null, {
+                                success: function(snippet) {
+                                    self.fire('iron-signal', {name: 'show-message', data: 'Snippet has been successfully shared'});
+                                    self.updateList();
+                                },
+                                error: function (error) {
+                                    self.fire('iron-signal', {name: 'show-error-message', data: error.message});
+                                }
+                            });
+                        }
+                    })
+                }
             }
         });
     </script>

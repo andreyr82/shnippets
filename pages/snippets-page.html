@@ -96,6 +96,7 @@
                             item.save(null, {
                                 success: function(snippet) {
                                     self.fire('iron-signal', {name: 'show-message', data: 'Snippet has been successfully shared'});
+                                    self.updateList();
                                 },
                                 error: function (error) {
                                     self.fire('iron-signal', {name: 'show-error-message', data: error.message});
